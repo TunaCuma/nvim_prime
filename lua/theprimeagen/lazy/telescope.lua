@@ -25,6 +25,7 @@ return {
             builtin.grep_string({ search = vim.fn.input("Grep > ") })
         end)
         vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})
+        vim.keymap.set("n", "<leader>pl", "<cmd>Telescope live_grep<CR>", { desc = "Live grep" })
     end
 }
 
