@@ -75,6 +75,24 @@ autocmd('LspAttach', {
     end
 })
 
+autocmd('VimEnter', {
+    group = ThePrimeagenGroup,
+    callback = function()
+                -- check if no files are supplied (only args[0] is "nvim")
+        if vim.fn.argc() == 0 then
+            -- open oil in the current directory
+            vim.defer_fn(function()
+                vim.cmd("Oil")
+            end, 100)
+        end
+    end
+})
+
+vim.opt.fillchars = { fold = " " }
+vim.opt.foldmethod = "indent"
+vim.opt.foldenable = false
+vim.opt.foldlevel = 99
+
 -- vim.g.netrw_browse_split = 0
 -- vim.g.netrw_banner = 0
 -- vim.g.netrw_winsize = 25

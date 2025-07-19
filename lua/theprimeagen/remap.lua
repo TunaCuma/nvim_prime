@@ -95,3 +95,6 @@ vim.keymap.set(
 	"<ESC><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>",
 	{ desc = "Toggle comment" }
 )
+
+vim.keymap.set("n","<Esc>","<cmd> noh <CR>")
+
