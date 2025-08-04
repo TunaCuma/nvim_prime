@@ -12,6 +12,13 @@ vim.opt.smartindent = true
 
 vim.opt.wrap = false
 
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "markdown",
+	callback = function()
+		vim.opt_local.wrap = true -- Only for this buffer
+	end,
+})
+
 vim.opt.swapfile = false
 vim.opt.backup = false
 vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"

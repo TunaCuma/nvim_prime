@@ -1,0 +1,9 @@
+{
+    "diagnostics.globals": [
+        "functoin",
+        "greet"
+    ],
+    "diagnostics.disable": [
+        "undefined-global"
+    ]
+}

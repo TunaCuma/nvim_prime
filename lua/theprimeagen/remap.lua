@@ -4,7 +4,7 @@ vim.g.mapleader = " "
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
-vim.api.nvim_set_keymap("n", "<leader>tf", "<Plug>PlenaryTestFile", { noremap = false, silent = false })
+-- vim.api.nvim_set_keymap("n", "<leader>tf", "<Plug>PlenaryTestFile", { noremap = false, silent = false })
 
 vim.keymap.set("n", "J", "mzJ`z")
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
@@ -43,7 +43,7 @@ vim.keymap.set("n", "<leader>j", "<cmd>lnext<CR>zz")
 vim.keymap.set("n", "<leader>k", "<cmd>lprev<CR>zz")
 
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
+vim.keymap.set("n", "<leader>ch", "<cmd>!chmod +x %<CR>", { silent = true })
 
 vim.keymap.set("n", "<leader>ee", "oif err != nil {<CR>}<Esc>Oreturn err<Esc>")
 
@@ -96,5 +96,117 @@ vim.keymap.set(
 	{ desc = "Toggle comment" }
 )
 
-vim.keymap.set("n","<Esc>","<cmd> noh <CR>")
+vim.keymap.set("n", "<Esc>", "<cmd> noh <CR>")
 
+vim.keymap.set("n", "<leader>tu", function()
+	-- get current file, strip .py, replace / with .
+	local file = vim.fn.expand("%:r")
+	local module = string.gsub(file, "/", ".")
+	local cmd = "uc monolith unittest " .. module
+	vim.cmd("split | terminal " .. cmd)
+end, { desc = "Run unit test for current module" })
+
+vim.keymap.set("n", "<leader>n", function()
+	local curfile = vim.api.nvim_buf_get_name(0)
+	local dir = vim.fn.fnamemodify(curfile, ":p:h")
+	if dir ~= "" then
+		vim.cmd("lcd " .. dir)
+	end
+	vim.cmd("enew")
+end, { desc = "New empty buffer in current file's directory" })
+
+-- new tab
+vim.keymap.set("n", "<leader>tn", function()
+	local file = vim.api.nvim_buf_get_name(0)
+	local dir = vim.fn.fnamemodify(file, ":h")
+	vim.cmd("tabnew")
+	vim.cmd("tcd " .. vim.fn.fnameescape(dir))
+	if file ~= "" then
+		vim.cmd("edit " .. vim.fn.fnameescape(file))
+	end
+end, { noremap = true, silent = true })
+
+-- next tab
+vim.keymap.set("n", "<tab>", "<cmd>tabnext<CR>")
+
+-- previous tab
+vim.keymap.set("n", "<S-tab>", "<cmd>tabprevious<CR>")
+
+-- close tab
+vim.keymap.set("n", "<leader>x", "<cmd>tabclose<CR>")
+
+-- close all tabs
+vim.keymap.set("n", "<leader>X", "<cmd>tabonly<CR>")
+
+vim.keymap.set("n", "j", "gj")
+vim.keymap.set("n", "k", "gk")
+
+local function get_github_info()
+	-- Get relative file path from git root
+	local handle = io.popen("git rev-parse --show-toplevel")
+	if not handle then
+		error("Failed to get git root directory")
+	end
+	local git_root = handle:read("*a"):gsub("\n", "")
+	handle:close()
+
+	local full_path = vim.fn.expand("%:p")
+	local file = full_path:gsub("^" .. git_root:gsub("([%(%)%.%+%-%*%?%[%]%^%$%%])", "%%%1") .. "/", "")
+
+	-- Get repo url
+	handle = io.popen("git config --get remote.origin.url")
+	if not handle then
+		error("Failed to get git remote URL")
+	end
+	local repo_url = handle:read("*a"):gsub("\n", "")
+	handle:close()
+
+	-- Clean up repo url
+	repo_url = repo_url:gsub("git@github.com:", "https://github.com/")
+	repo_url = repo_url:gsub("%.git$", "")
+	if not repo_url:match("^https://github.com/") then
+		repo_url = repo_url:gsub("^git://github.com/", "https://github.com/")
+	end
+
+	-- Get branch
+	handle = io.popen("git rev-parse --abbrev-ref HEAD")
+	if not handle then
+		error("Failed to get git branch")
+	end
+	local branch = handle:read("*a"):gsub("\n", "")
+	handle:close()
+
+	return repo_url, branch, file
+end
+
+local function copy_github_link()
+	local repo_url, branch, file = get_github_info()
+	local line = vim.fn.line(".")
+	local url = string.format("%s/blob/%s/%s#L%d", repo_url, branch, file, line)
+
+	vim.fn.setreg("+", url)
+	vim.notify("Copied link: " .. url)
+end
+
+local function copy_github_link_visual()
+	-- Get visual selection range before doing anything else
+	local start_line = vim.fn.line("v")
+	local end_line = vim.fn.line(".")
+
+	-- Ensure start_line <= end_line
+	if start_line > end_line then
+		start_line, end_line = end_line, start_line
+	end
+
+	local repo_url, branch, file = get_github_info()
+	local url = string.format("%s/blob/%s/%s#L%d-L%d", repo_url, branch, file, start_line, end_line)
+
+	vim.fn.setreg("+", url)
+	vim.notify("Copied link: " .. url)
+end
+
+vim.keymap.set("n", "<leader>gh", copy_github_link, { noremap = true, silent = true })
+vim.keymap.set("v", "<leader>gh", copy_github_link_visual, { noremap = true, silent = true })
+
+-- Map the escape sequence to Ctrl+I
+vim.keymap.set({ "n", "i", "v" }, "<Esc>[1;5I", "<C-i>", {})
