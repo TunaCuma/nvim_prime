@@ -1,30 +1,31 @@
-
 return {
-    {
-        "L3MON4D3/LuaSnip",
-        -- follow latest release.
-        version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
-        -- install jsregexp (optional!).
-        build = "make install_jsregexp",
+	{
+		"L3MON4D3/LuaSnip",
+		-- follow latest release.
+		version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+		-- install jsregexp (optional!).
+		build = "make install_jsregexp",
 
-        dependencies = { "rafamadriz/friendly-snippets" },
+		dependencies = { "rafamadriz/friendly-snippets" },
 
-        config = function()
-            local ls = require("luasnip")
-            ls.filetype_extend("javascript", { "jsdoc" })
+		config = function()
+			local ls = require("luasnip")
+			local s = ls.snippet
+			local t = ls.text_node
+			local i = ls.insert_node
+			local fmt = require("luasnip.extras.fmt").fmt
 
-            --- TODO: What is expand?
-            vim.keymap.set({"i"}, "<C-s>e", function() ls.expand() end, {silent = true})
+			ls.filetype_extend("javascript", { "jsdoc" })
 
-            vim.keymap.set({"i", "s"}, "<C-s>;", function() ls.jump(1) end, {silent = true})
-            vim.keymap.set({"i", "s"}, "<C-s>,", function() ls.jump(-1) end, {silent = true})
+			-- Load snippets from external files
+			require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets" })
 
-            vim.keymap.set({"i", "s"}, "<C-E>", function()
-                if ls.choice_active() then
-                    ls.change_choice(1)
-                end
-            end, {silent = true})
-        end,
-    }
+			vim.keymap.set({ "i", "s" }, "<C-s>j", function()
+				ls.jump(1)
+			end, { silent = true })
+			vim.keymap.set({ "i", "s" }, "<C-s>k", function()
+				ls.jump(-1)
+			end, { silent = true })
+		end,
+	},
 }
-

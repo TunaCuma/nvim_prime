@@ -9,6 +9,16 @@ local root_files = {
 	".git",
 }
 
+local function get_python_path()
+	-- Use activated virtualenv.
+	if vim.env.VIRTUAL_ENV then
+		return require("lspconfig.util").path.join(vim.env.VIRTUAL_ENV, "bin", "python")
+	end
+
+	-- Fallback to system Python.
+	return vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
+end
+
 return {
 	"neovim/nvim-lspconfig",
 	dependencies = {
@@ -121,13 +131,45 @@ return {
 					local lspconfig = require("lspconfig")
 					lspconfig.basedpyright.setup({
 						capabilities = capabilities,
+						on_attach = function(client, bufnr)
+							-- Disable document formatting (use ruff for that)
+							client.server_capabilities.document_formatting = false
+							-- Disable semantic tokens if you prefer treesitter highlighting
+							client.server_capabilities.semanticTokensProvider = nil
+
+							-- Enable inlay hints if supported (Neovim 0.10+)
+							if client.supports_method("textDocument/inlayHint") then
+								vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+							end
+						end,
 						settings = {
 							basedpyright = {
 								analysis = {
-									typeCheckingMode = "basic", -- or "strict"
+									autoSearchPaths = true,
+									diagnosticMode = "openFilesOnly", -- Only check open files for better performance
+									useLibraryCodeForTypes = true,
+									typeCheckingMode = "basic", -- Change to "all" if you want stricter checking
+									-- Disable some noisy diagnostics
+									diagnosticSeverityOverrides = {
+										reportAny = false,
+										reportMissingTypeArgument = false,
+										reportMissingTypeStubs = false,
+										reportUnknownArgumentType = false,
+										reportUnknownMemberType = false,
+										reportUnknownParameterType = false,
+										reportUnknownVariableType = false,
+										reportUnusedCallResult = false,
+									},
 								},
 							},
+							python = {},
 						},
+						before_init = function(_, config)
+							local python_path = get_python_path()
+							config.settings.python.pythonPath = python_path
+							-- Optional: notify which Python path is being used
+							-- vim.notify("Using Python: " .. python_path)
+						end,
 					})
 				end,
 
@@ -161,10 +203,6 @@ return {
 				if buftype == "prompt" then
 					return false
 				end
-				local filetype = vim.api.nvim_buf_get_option(0, "filetype")
-				if filetype == "markdown" then
-					return false
-				end
 				return true
 			end,
 			sources = cmp.config.sources({
@@ -174,6 +212,15 @@ return {
 			}, {
 				{ name = "buffer" },
 			}),
+		})
+
+		-- Configure sources specifically for markdown files (no buffer suggestions)
+		cmp.setup.filetype('markdown', {
+			sources = cmp.config.sources({
+				{ name = "copilot", group_index = 2 },
+				{ name = "luasnip" }, -- For luasnip users (your snippets)
+				{ name = "path" }, -- File path completion
+			})
 		})
 
 		vim.diagnostic.config({

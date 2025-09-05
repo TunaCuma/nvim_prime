@@ -18,6 +18,13 @@ return {
 				css = { "prettierd" },
 				scss = { "prettierd" },
 				html = { "prettierd" },
+				sql = { "sql_formatter" },
+			},
+
+			formatters = {
+				sql_formatter = {
+					args = { "--language", "spark" }, -- Spark SQL support
+				},
 			},
 		})
 	end,
