@@ -20,10 +20,10 @@ return {
 			-- Load snippets from external files
 			require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets" })
 
-			vim.keymap.set({ "i", "s" }, "<C-s>j", function()
+			vim.keymap.set({ "i", "s" }, "<C-s>n", function()
 				ls.jump(1)
 			end, { silent = true })
-			vim.keymap.set({ "i", "s" }, "<C-s>k", function()
+			vim.keymap.set({ "i", "s" }, "<C-s>p", function()
 				ls.jump(-1)
 			end, { silent = true })
 		end,

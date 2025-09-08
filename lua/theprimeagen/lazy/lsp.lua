@@ -215,12 +215,12 @@ return {
 		})
 
 		-- Configure sources specifically for markdown files (no buffer suggestions)
-		cmp.setup.filetype('markdown', {
+		cmp.setup.filetype("markdown", {
 			sources = cmp.config.sources({
 				{ name = "copilot", group_index = 2 },
 				{ name = "luasnip" }, -- For luasnip users (your snippets)
 				{ name = "path" }, -- File path completion
-			})
+			}),
 		})
 
 		vim.diagnostic.config({
