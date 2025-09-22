@@ -34,6 +34,24 @@ return {
 		-- see below for full list of options 👇
 	},
 	keys = {
-		{ "<leader>op", "<cmd>ObsidianPasteImg<cr>", desc = "Paste Obsidian image" },
+		{
+			"<leader>op",
+			function()
+				-- Generate filename automatically
+				local current_file = vim.fn.expand("%:t:r") -- current file name without extension
+				local current_dir = vim.fn.expand("%:p:h:t") -- current directory name
+				local timestamp = os.date("%Y%m%d_%H%M%S") -- date and time
+
+				-- Create the filename: directory_filename_timestamp.png
+				local filename = string.format("%s_%s_%s.png", current_dir, current_file, timestamp)
+
+				-- Replace any spaces or special characters with underscores
+				filename = filename:gsub("[%s%W]", "_"):gsub("_+", "_")
+
+				-- Execute ObsidianPasteImg with the generated filename
+				vim.cmd("ObsidianPasteImg " .. filename)
+			end,
+			desc = "Paste Obsidian image with auto-generated name",
+		},
 	},
 }

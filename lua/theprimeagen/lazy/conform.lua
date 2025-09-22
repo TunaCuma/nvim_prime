@@ -6,7 +6,7 @@ return {
 			formatters_by_ft = {
 				lua = { "stylua" },
 				go = { "gofmt" },
-				python = { "ruff_format" },
+				-- python = { "ruff_format" },
 				markdown = { "prettierd" },
 
 				-- Next.js/React file types

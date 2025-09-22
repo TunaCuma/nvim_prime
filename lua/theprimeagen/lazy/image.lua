@@ -9,10 +9,8 @@ return {
 				resolve_image_path = function(document_path, image_path, fallback)
 					-- Define the base path of your vault with proper expansion
 					local vault_base_path = vim.fn.expand("~/Desktop/obsidian-vault")
-
 					-- For Obsidian, you typically want to look in assets/imgs
 					local adjusted_path = vault_base_path .. "/" .. image_path
-
 					-- Check if the file exists at the adjusted path
 					if vim.fn.filereadable(adjusted_path) == 1 then
 						print("Found image at:", adjusted_path)
